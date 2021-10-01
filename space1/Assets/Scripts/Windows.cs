@@ -1,73 +1,71 @@
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter))]
-public class Windows : MonoSingleton<Windows>
+public class Windows : MonoBehaviour
 {
-    public static Mesh mesh;
-    private static Vector3[] vertices;
-    private static int[] triangles;
-    private static int zNum = 8;
+    private Quad[,] quads;
+    [SerializeField] private Quad quadPrefab;
+
+    private static int yNum = 8;
     private static int xMargin = 1;
-    private static float bottom = 0.25f;
+    private static float bottom = 0.2f;
     private static float top = 0.9f;
-    private static float winHeight = (top - bottom) / (2 * zNum - 1);
+    private static float winHeight = (top - bottom) / (2 * yNum - 1);
 
-    private void Awake()
+    private void Start()
     {
-        mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
-    }
+        quads = new Quad[1 + (Building.getRes() - 2 * xMargin) / 2, yNum];
 
-    public void setMesh(Building building, Building matBuilding)
-    {
-        vertices = new Vector3[zNum * 4 * (1 + (building.getRes() - 2 * xMargin) / 2)];
-        triangles = new int[3 * vertices.Length / 2];
-
-        Vector3[] bv = building.vertices;
-
-        for (int x = xMargin; x < building.getRes() - xMargin; x += 2)
+        for (int x = 0; x < quads.GetLength(0); x++)
         {
-            Vector3[] bvs = new Vector3[4];
-            bvs[0] = new Vector3(bv[2 * x].x, 0f, bv[2 * x].z);
-            bvs[1] = bv[2 * x + 1];
-            bvs[2] = new Vector3(bv[2 * x + 2].x, 0f, bv[2 * x + 2].z);
-            bvs[3] = bv[2 * x + 3];
-
-            for (int i = 0; i < bvs.Length; i++)
+            for (int y = 0; y < quads.GetLength(1); y++)
             {
-                bvs[i] = Vector3.Lerp(bvs[i], Vector3.zero, 0.001f);
-            }
+                Quad newQuad = Instantiate(quadPrefab);
 
-            for (int z = 0; z < zNum; z++)
-            {
-                float winBottom = bottom + 2 * z * winHeight;
-                float winTop = winBottom + winHeight;
-
-                int currentWindow = zNum * (x - xMargin) / 2 + z;
-
-                int currentVertexIndex = 4 * currentWindow;
-
-                vertices[currentVertexIndex] = Vector3.Lerp(bvs[0], bvs[1], winBottom);
-                vertices[currentVertexIndex + 1] = Vector3.Lerp(bvs[0], bvs[1], winTop);
-                vertices[currentVertexIndex + 2] = Vector3.Lerp(bvs[2], bvs[3], winBottom);
-                vertices[currentVertexIndex + 3] = Vector3.Lerp(bvs[2], bvs[3], winTop);
-
-                int currentTriangleIndex = 6 * currentWindow;
-                triangles[currentTriangleIndex] = currentVertexIndex;
-                triangles[currentTriangleIndex + 1] = currentVertexIndex + 2;
-                triangles[currentTriangleIndex + 2] = currentVertexIndex + 1;
-                triangles[currentTriangleIndex + 3] = currentVertexIndex + 1;
-                triangles[currentTriangleIndex + 4] = currentVertexIndex + 2;
-                triangles[currentTriangleIndex + 5] = currentVertexIndex + 3;
+                quads[x, y] = newQuad;
+                newQuad.transform.SetParent(transform);
             }
         }
+    }
 
-        mesh.Clear();
+    public void SetMeshes(Building building, Building matBuilding)
+    {
+        Vector3[] bv = building.vertices;
 
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
+        for (int x = 0; x < quads.GetLength(0); x++)
+        {
+            int bvStart = (xMargin + 2 * x) * 2;
 
-        GetComponent<MeshRenderer>().material = matBuilding.GetComponent<MeshRenderer>().material;
+            Vector3[] bvs = new Vector3[4];
+            bvs[0] = new Vector3(bv[bvStart].x, 0f, bv[bvStart].z);
+            bvs[1] = bv[bvStart + 1];
+            bvs[2] = new Vector3(bv[bvStart + 2].x, 0f, bv[bvStart + 2].z);
+            bvs[3] = bv[bvStart + 3];
+            for (int i = 0; i < bvs.Length; i++)
+            {
+                bvs[i] = Vector3.Lerp(bvs[i], Vector3.up * bvs[i].y, 0.01f);
+            }
+
+            for (int y = 0; y < quads.GetLength(1); y++)
+            {
+                float winBottom = bottom + 2 * y * winHeight;
+                float winTop = winBottom + winHeight;
+
+                Vector3 v0 = Vector3.Lerp(bvs[0], bvs[1], winBottom);
+                Vector3 v1 = Vector3.Lerp(bvs[0], bvs[1], winTop);
+                Vector3 v2 = Vector3.Lerp(bvs[2], bvs[3], winBottom);
+                Vector3 v3 = Vector3.Lerp(bvs[2], bvs[3], winTop);
+
+                quads[x, y].SetMesh(v0, v1, v2, v3);
+                quads[x, y].GetComponent<MeshRenderer>().material = matBuilding.GetComponent<MeshRenderer>().material;
+            }
+        }
+    }
+
+    public void StartFades(bool on)
+    {
+        foreach (Quad quad in quads)
+        {
+            quad.StartFade(Random.Range(0f, 2f), on);
+        }
     }
 }

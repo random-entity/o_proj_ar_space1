@@ -3,23 +3,19 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
 {
-    BuildingSystem bs;
-    #region Fields for Mesh generation
+    #region Fields for mesh generation
     private Mesh mesh;
     [HideInInspector] public Vector3[] vertices;
     private int[] triangles;
     private static int res = 17; // 홀수로 해줘잉
-    public int getRes()
+    public static int getRes()
     {
         return res;
     }
     #endregion
 
-    #region Fields for building position and size
+    #region The one important field to determine building size & its getter and setter
     private float angWid;
-    #endregion
-
-    #region Getters and Setters for current angWid
     public void setAngWid(float newValue)
     {
         angWid = Mathf.Clamp(newValue, BuildingSystem.presetAngWids[BuildingSystem.presetAngWids.Length - 1], BuildingSystem.presetAngWids[0]);
@@ -28,27 +24,25 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
 
     private void Start()
     {
-        bs = BuildingSystem.instance;
-
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
     }
 
-    public void UpdateMesh(float factor, int localIndex)
-    { // 0 <= factor < 1
-        float angWid = BuildingSystem.presetAngWids[0] * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)localIndex + factor);
-        float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisRatio, 3 - localIndex + factor);
+    public void UpdateMesh(float factor, int roleIndex) // 0 <= factor < 1
+    { 
+        float angWid = BuildingSystem.presetAngWids[0] * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
+        float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisRatio, 3 - roleIndex + factor);
 
         setAngWid(angWid);
         UpdateMesh(this.angWid, radius, false);
 
-        if (localIndex == 3)
-        { // zeroToDoor Building
+        if (roleIndex == 3) // zeroToDoor Building
+        { 
             transform.position = Vector3.up * (radius * angWid * BuildingSystem.angWidToHeight * 4f * (factor - 1f));
         }
     }
 
-    public void UpdateMesh(float angWid, float radius, bool coverTop)
+    private void UpdateMesh(float angWid, float radius, bool coverTop)
     {
         vertices = new Vector3[2 * res + 2];
         for (int i = 0; i <= res; i++)

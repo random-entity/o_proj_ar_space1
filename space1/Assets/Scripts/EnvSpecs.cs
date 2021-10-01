@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class EnvSpecs : MonoBehaviour
+public class EnvSpecs : MonoSingleton<EnvSpecs>
 {
-    public static float landRadius = 50f;
+    public static float landRadius = 15f;
     [SerializeField] private Transform groundCylinder;
 
     private void Start()

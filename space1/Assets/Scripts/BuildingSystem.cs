@@ -6,6 +6,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     public Building[] buildings;
     public Material[] materials;
     private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
+    [SerializeField] private Windows[] windowsSets;
     #endregion
 
     #region Fields for Buildings drawing
@@ -18,15 +19,16 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
 
     #region Fields for processing player control input
     private float playerSpeed = 0.3f;
-    private float playerWalkDist = 0f; // 1f가 되면 한 페이즈 종료.
+    private float playerWalk = 0f; // 1f가 되면 한 페이즈 종료.
     private int iteration = 0;
     #endregion
 
     private void Start()
     {
         buildings = GetComponentsInChildren<Building>();
-        if (buildings.Length != 6) Debug.LogWarning("Number of buildings != 6.");
-        if (materials.Length != 3) Debug.LogWarning("Number of materials != 3.");
+        if (buildings.Length != 6) Debug.LogWarning("Number of buildings != 6. Check Hierarchy.");
+        if (materials.Length != 3) Debug.LogWarning("Number of materials != 3. Check Inspector.");
+        if (windowsSets.Length != 2) Debug.LogWarning("Number of Windows Sets != 2. Check Inspector.");
 
         presetAngWids = new float[4];
         presetAngWids[0] = 2f * Mathf.PI;
@@ -40,7 +42,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
             buildings[i].GetComponent<MeshRenderer>().material = materials[i % 3];
         }
 
-        SetBuildingsLocalIndices();
+        SetBuildingsRoleIndices();
         WalkAndUpdate(true);
     }
 
@@ -56,7 +58,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         }
     }
 
-    private void SetBuildingsLocalIndices()
+    private void SetBuildingsRoleIndices()
     {
         sky = buildings[iteration];
         buildingToSky = buildings[(iteration + 1) % 6];
@@ -72,38 +74,36 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         unseen1.gameObject.SetActive(false);
         unseen2.gameObject.SetActive(false);
     }
-    private void UpdateBuildingsShape()
+    private void UpdateBuildingsMesh()
     {
-        sky.UpdateMesh(playerWalkDist, 0);
-        buildingToSky.UpdateMesh(playerWalkDist, 1);
-        doorToBuilding.UpdateMesh(playerWalkDist, 2);
-        zeroToDoor.UpdateMesh(playerWalkDist, 3);
-        Windows.instance.setMesh(buildingToSky, doorToBuilding);
+        sky.UpdateMesh(playerWalk, 0);
+        buildingToSky.UpdateMesh(playerWalk, 1);
+        doorToBuilding.UpdateMesh(playerWalk, 2);
+        zeroToDoor.UpdateMesh(playerWalk, 3);
+
+        windowsSets[0].SetMeshes(buildingToSky, doorToBuilding);
+        windowsSets[0].StartFades(true);
     }
     private void WalkAndUpdate(bool forward)
     {
-        playerWalkDist += (forward ? 1f : -1f) * playerSpeed * Time.deltaTime;
-        if (playerWalkDist >= 1f)
+        playerWalk += (forward ? 1f : -1f) * playerSpeed * Time.deltaTime;
+        if (playerWalk >= 1f)
         {
-            playerWalkDist %= 1f;
+            playerWalk %= 1f;
             iteration++;
-            if (iteration >= 6)
-            {
-                iteration %= 6;
-            }
-            SetBuildingsLocalIndices();
         }
-        else if (playerWalkDist < 0f)
+        else if (playerWalk < 0f)
         {
-            playerWalkDist += 1f;
+            playerWalk += 1f;
             iteration += 5;
-            if (iteration >= 6)
-            {
-                iteration %= 6;
-            }
-            SetBuildingsLocalIndices();
         }
 
-        UpdateBuildingsShape();
+        if (iteration >= 6)
+        {
+            iteration %= 6;
+        }
+        SetBuildingsRoleIndices();
+
+        UpdateBuildingsMesh();
     }
 }
