@@ -1,6 +1,6 @@
 // https://forum.unity.com/threads/unlit-with-adjustable-alpha.115455/
 
-Shader "Custom/UnlitTransparent" {
+Shader "Custom/UT0" {
 
     Properties {
         _Color ("Main Color (A=Opacity)", Color) = (1,1,1,1)

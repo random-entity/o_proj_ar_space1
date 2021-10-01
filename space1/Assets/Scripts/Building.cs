@@ -34,7 +34,7 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
         float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisRatio, 3 - roleIndex + factor);
 
         setAngWid(angWid);
-        UpdateMesh(this.angWid, radius, false);
+        UpdateMesh(this.angWid, radius, true);
 
         if (roleIndex == 3) // zeroToDoor Building
         { 

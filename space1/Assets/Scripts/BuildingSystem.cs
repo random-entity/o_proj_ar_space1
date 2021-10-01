@@ -7,6 +7,8 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     public Material[] materials;
     private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
     [SerializeField] private Windows[] windowsSets;
+    private int currentWinSetIndex = 0;
+
     #endregion
 
     #region Fields for Buildings drawing
@@ -41,6 +43,8 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         {
             buildings[i].GetComponent<MeshRenderer>().material = materials[i % 3];
         }
+
+        windowsSets[1].InitiateAllAlpha(0f);
 
         SetBuildingsRoleIndices();
         WalkAndUpdate(true);
@@ -81,8 +85,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         doorToBuilding.UpdateMesh(playerWalk, 2);
         zeroToDoor.UpdateMesh(playerWalk, 3);
 
-        windowsSets[0].SetMeshes(buildingToSky, doorToBuilding);
-        windowsSets[0].StartFades(true);
+        windowsSets[currentWinSetIndex].SetMeshes(buildingToSky, doorToBuilding);
     }
     private void WalkAndUpdate(bool forward)
     {
@@ -91,6 +94,12 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         {
             playerWalk %= 1f;
             iteration++;
+
+            int old = currentWinSetIndex;
+            currentWinSetIndex = currentWinSetIndex == 0 ? 1 : 0;
+
+            windowsSets[currentWinSetIndex].StartFades(true);
+            windowsSets[old].StartFades(false);
         }
         else if (playerWalk < 0f)
         {
@@ -102,6 +111,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         {
             iteration %= 6;
         }
+
         SetBuildingsRoleIndices();
 
         UpdateBuildingsMesh();

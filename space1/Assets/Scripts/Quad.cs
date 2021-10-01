@@ -21,6 +21,17 @@ public class Quad : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
+    public void setMaterialPreserveAlpha(Material newMaterial) // Quad instance의 material 새로 지정할 때는 꼭 이걸 써주세요~~!!!!!!!!
+    {
+        var saveAlpha = mr.material.color.a;
+
+        mr.material = newMaterial;
+
+        Color c = mr.material.color;
+        c.a = saveAlpha;
+        mr.material.color = c;
+    }
+
     private void Awake()
     {
         mesh = new Mesh();

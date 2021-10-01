@@ -42,7 +42,7 @@ public class Windows : MonoBehaviour
             bvs[3] = bv[bvStart + 3];
             for (int i = 0; i < bvs.Length; i++)
             {
-                bvs[i] = Vector3.Lerp(bvs[i], Vector3.up * bvs[i].y, 0.01f);
+                bvs[i] = Vector3.Lerp(bvs[i], Vector3.up * bvs[i].y, 0.05f);
             }
 
             for (int y = 0; y < quads.GetLength(1); y++)
@@ -56,7 +56,7 @@ public class Windows : MonoBehaviour
                 Vector3 v3 = Vector3.Lerp(bvs[2], bvs[3], winTop);
 
                 quads[x, y].SetMesh(v0, v1, v2, v3);
-                quads[x, y].GetComponent<MeshRenderer>().material = matBuilding.GetComponent<MeshRenderer>().material;
+                quads[x, y].setMaterialPreserveAlpha(matBuilding.GetComponent<MeshRenderer>().material);
             }
         }
     }
@@ -65,7 +65,17 @@ public class Windows : MonoBehaviour
     {
         foreach (Quad quad in quads)
         {
-            quad.StartFade(Random.Range(0f, 2f), on);
+            quad.StartFade(Random.Range(0f, 3f), on);
+        }
+    }
+
+    public void InitiateAllAlpha(float initAlpha)
+    {
+        foreach (Quad quad in quads)
+        {
+            Color c = quad.GetComponent<MeshRenderer>().material.color;
+            c.a = initAlpha;
+            quad.GetComponent<MeshRenderer>().material.color = c;
         }
     }
 }

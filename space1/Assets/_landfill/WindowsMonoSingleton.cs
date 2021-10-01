@@ -7,6 +7,7 @@ public class WindowsMonoSingleton : MonoSingleton<WindowsMonoSingleton>
     public static Mesh mesh;
     private static Vector3[] vertices;
     private static int[] triangles;
+    private MeshRenderer mr;
     #endregion
 
     #region Fields for windows count and position config
@@ -21,6 +22,8 @@ public class WindowsMonoSingleton : MonoSingleton<WindowsMonoSingleton>
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+
+        mr = GetComponent<MeshRenderer>();
     }
 
     public void setMesh(Building building, Building matBuilding)
@@ -71,7 +74,5 @@ public class WindowsMonoSingleton : MonoSingleton<WindowsMonoSingleton>
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
-
-        GetComponent<MeshRenderer>().material = matBuilding.GetComponent<MeshRenderer>().material;
     }
 }
