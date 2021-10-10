@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EnvSpecs : MonoSingleton<EnvSpecs>
 {
-    public static float landRadius = 15f;
+    public static float landRadius = 50f;
     [SerializeField] private Transform groundCylinder;
 
     private void Start()

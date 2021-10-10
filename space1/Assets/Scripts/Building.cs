@@ -16,8 +16,14 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
         return res;
     }
     private Material material;
+    public Material GetMaterial() {
+        return material;
+    }
     public void setMaterialColor(Color c) {
         material.color = c;
+    }
+    public void setRenderQueue(int order) {
+        material.renderQueue = 3000 + order;
     }
     #endregion
 
@@ -38,7 +44,11 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
 
     public void UpdateMesh(float factor, int roleIndex) // 0 <= factor < 1
     { 
-        float angWid = Mathf.PI * 2f * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
+        float angWid = Mathf.PI * 2f;
+        if(roleIndex != 0) {
+            angWid *= Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
+        }
+        // float angWid = Mathf.PI * 2f * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
         float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisStepRatio, 3 - roleIndex + factor);
 
         setAngWid(angWid);

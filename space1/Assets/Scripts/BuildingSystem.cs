@@ -13,7 +13,11 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     {
         return currWinGrpBool ? 1 : 0;
     }
-    private int toggleCurrWinGrpBool()
+    private int getNotCurrWinGrpIndex()
+    {
+        return currWinGrpBool ? 0 : 1;
+    }
+    private int toggleReturnCurrWinGrpBool()
     {
         currWinGrpBool = !currWinGrpBool;
         return getCurrWinGrpIndex();
@@ -104,6 +108,12 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         buildingToSky.setMaterialColor(getColorFromDayPhase(currDayPhase + 1));
         doorToBuilding.setMaterialColor(getColorFromDayPhase(currDayPhase + 2));
         zeroToDoor.setMaterialColor(getColorFromDayPhase(currDayPhase + 3));
+
+        sky.setRenderQueue(0);
+        buildingToSky.setRenderQueue(1);
+        doorToBuilding.setRenderQueue(2);
+        zeroToDoor.setRenderQueue(3);
+
         sky.gameObject.SetActive(true);
         buildingToSky.gameObject.SetActive(true);
         doorToBuilding.gameObject.SetActive(true);
@@ -124,7 +134,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
                 currDayPhase++;
 
                 windowGroups[getCurrWinGrpIndex()].StartFades(false);
-                windowGroups[toggleCurrWinGrpBool()].StartFades(true);
+                windowGroups[toggleReturnCurrWinGrpBool()].StartFades(true);
             }
             else // if (playerWalk < 0f)
             {
@@ -132,6 +142,9 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
 
                 currStep += 5;
                 currDayPhase += totalDayPhase - 1;
+
+                // windowGroups[getCurrWinGrpIndex()].StartFades(false);
+                // windowGroups[toggleReturnCurrWinGrpBool()].StartFades(true);
             }
 
             if (currStep >= 6)
@@ -156,5 +169,6 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         zeroToDoor.UpdateMesh(playerWalk, 3);
 
         windowGroups[getCurrWinGrpIndex()].SetMeshes(buildingToSky, doorToBuilding);
+        // windowGroups[getNotCurrWinGrpIndex()].SetMeshes(sky, buildingToSky);
     }
 }

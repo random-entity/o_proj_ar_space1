@@ -40,10 +40,10 @@ public class WindowGroup : MonoBehaviour
             bvs[1] = bv[bvStart + 1];
             bvs[2] = new Vector3(bv[bvStart + 2].x, 0f, bv[bvStart + 2].z);
             bvs[3] = bv[bvStart + 3];
-            for (int i = 0; i < bvs.Length; i++)
-            {
-                bvs[i] = Vector3.Lerp(bvs[i], Vector3.up * bvs[i].y, 0.05f);
-            }
+            // for (int i = 0; i < bvs.Length; i++)
+            // {
+            //     bvs[i] = Vector3.Lerp(bvs[i], Vector3.up * bvs[i].y, 0.05f);
+            // }
 
             for (int y = 0; y < quads.GetLength(1); y++)
             {
@@ -56,7 +56,7 @@ public class WindowGroup : MonoBehaviour
                 Vector3 v3 = Vector3.Lerp(bvs[2], bvs[3], winTop);
 
                 quads[x, y].SetMesh(v0, v1, v2, v3);
-                quads[x, y].setMaterialPreserveAlpha(matBuilding.GetComponent<MeshRenderer>().material);
+                quads[x, y].setMaterialPreserveAlpha(matBuilding.GetMaterial());
             }
         }
     }
@@ -65,7 +65,7 @@ public class WindowGroup : MonoBehaviour
     {
         foreach (Quad quad in quads)
         {
-            quad.StartFade(Random.Range(0f, 3f), on);
+            quad.StartFade(Random.Range(0f, 2f), on);
         }
     }
 
