@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6742004886744046929}
   - component: {fileID: 6742004886744046930}
   m_Layer: 0
-  m_Name: Windows
+  m_Name: WindowGroup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
