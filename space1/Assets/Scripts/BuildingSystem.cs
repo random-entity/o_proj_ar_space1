@@ -26,7 +26,6 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     public static float angWidStepRatio = 16f;
     public static float raduisStepRatio = 1.1f;
     public static float angWidToHeight = 1.5f;
-    // [SerializeField] private Material[] materials; // Material instancing(?)으로 전환?
     #endregion
 
     #region fields for processing player control input
@@ -35,8 +34,8 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     private int currStep = 0;
     // private int totalStep = 3 * 2;
     private int currDayPhase = 0;
-    private int totalDayPhase = 4;
-    private Color[] palette = new Color[] { Color.red, Color.yellow, Color.green, Color.blue };
+    public static int totalDayPhase = 4;
+    private static Color[] palette;
     private Color getColorFromDayPhase(int dayPhase)
     {
         if (dayPhase < 0)
@@ -64,7 +63,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     {
         initiateArray<Building>(out buildings, 6, buildingPrefab);
         initiateArray<WindowGroup>(out windowGroups, 2, windowGroupPrefab);
-        windowGroups[0].InitiateAllAlpha(0.5f);
+        windowGroups[0].InitiateAllAlpha(1f);
         windowGroups[1].InitiateAllAlpha(0f);
 
         presetAngWids = new float[4];
@@ -73,6 +72,8 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         {
             presetAngWids[i] = presetAngWids[i - 1] / angWidStepRatio;
         }
+
+        palette = Palette.instance.palette;
 
         SetBuildingsRoleIndicesAndColor();
         WalkAndUpdate(true);

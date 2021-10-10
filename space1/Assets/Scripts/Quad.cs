@@ -43,7 +43,6 @@ public class Quad : MonoBehaviour
 
     private IEnumerator Fade(float wait, bool on)
     {
-        Debug.Log("fade start");
         yield return new WaitForSeconds(wait);
 
         for (float fadeAlpha = on ? 0f : 1f; 0 <= fadeAlpha && fadeAlpha <= 1; fadeAlpha += on ? 0.04f : -0.02f)
@@ -53,7 +52,6 @@ public class Quad : MonoBehaviour
             mr.material.color = c;
             yield return new WaitForSeconds(0.01f);
         }
-        Debug.Log("fade end");
     }
 
     public void StartFade(float wait, bool on)
