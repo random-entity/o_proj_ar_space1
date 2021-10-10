@@ -19,6 +19,7 @@ public class Quad : MonoBehaviour
         mesh.vertices = vertices;
         mesh.triangles = new int[] { 0, 2, 1, 1, 2, 3 };
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
     }
 
     public void setMaterialPreserveAlpha(Material newMaterial) // Quad instance의 material 새로 지정할 때는 꼭 이걸 써주세요~~!!!!!!!!

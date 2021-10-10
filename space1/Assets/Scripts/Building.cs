@@ -3,18 +3,21 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
 {
-    #region Fields for mesh generation
+    #region fields (+ getters) for mesh generation
     private Mesh mesh;
-    [HideInInspector] public Vector3[] vertices;
+    private Vector3[] vertices;
     private int[] triangles;
     private static int res = 17; // 홀수로 해줘잉
+    public Vector3[] getVertices() {
+        return vertices;
+    }
     public static int getRes()
     {
         return res;
     }
     #endregion
 
-    #region The one important field to determine building size & its getter and setter
+    #region the one definitive field to determine building size & its getter and setter
     private float angWid;
     public void setAngWid(float newValue)
     {
@@ -31,7 +34,7 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
     public void UpdateMesh(float factor, int roleIndex) // 0 <= factor < 1
     { 
         float angWid = BuildingSystem.presetAngWids[0] * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
-        float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisRatio, 3 - roleIndex + factor);
+        float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisStepRatio, 3 - roleIndex + factor);
 
         setAngWid(angWid);
         UpdateMesh(this.angWid, radius, true);

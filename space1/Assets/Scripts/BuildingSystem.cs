@@ -2,24 +2,23 @@ using UnityEngine;
 
 public class BuildingSystem : MonoSingleton<BuildingSystem>
 {
-    #region Fields for Buildings config
-    public Building[] buildings;
-    public Material[] materials;
+    #region fields for Buildings config
+    private Building[] buildings;
     private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
-    [SerializeField] private Windows[] windowsSets;
+    [SerializeField] private WindowSet[] windowSets;
     private int currentWinSetIndex = 0;
-
     #endregion
 
-    #region Fields for Buildings drawing
-    public static float centerDir = Mathf.PI * 0.5f; // = 0 degrees // 빌딩의 중심축이 xz 평면에서 어떤 argument(각) 갖는지. 
+    #region fields for Buildings drawing
+    public static float centerDir = Mathf.PI * 0.5f; // 빌딩의 중심축이 xz 평면에서 어떤 argument(각) 갖는지.
     public static float[] presetAngWids;
     public static float angWidStepRatio = 16f;
-    public static float raduisRatio = 1.1f;
+    public static float raduisStepRatio = 1.1f;
     public static float angWidToHeight = 1.5f;
+    [SerializeField] private Material[] materials; // Material instancing(?)으로 전환?
     #endregion
 
-    #region Fields for processing player control input
+    #region fields for processing player control input
     private float playerSpeed = 0.3f;
     private float playerWalk = 0f; // 1f가 되면 한 페이즈 종료.
     private int iteration = 0;
@@ -30,7 +29,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         buildings = GetComponentsInChildren<Building>();
         if (buildings.Length != 6) Debug.LogWarning("Number of buildings != 6. Check Hierarchy.");
         if (materials.Length != 3) Debug.LogWarning("Number of materials != 3. Check Inspector.");
-        if (windowsSets.Length != 2) Debug.LogWarning("Number of Windows Sets != 2. Check Inspector.");
+        if (windowSets.Length != 2) Debug.LogWarning("Number of Windows Sets != 2. Check Inspector.");
 
         presetAngWids = new float[4];
         presetAngWids[0] = 2f * Mathf.PI;
@@ -44,7 +43,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
             buildings[i].GetComponent<MeshRenderer>().material = materials[i % 3];
         }
 
-        windowsSets[1].InitiateAllAlpha(0f);
+        windowSets[1].InitiateAllAlpha(0f);
 
         SetBuildingsRoleIndices();
         WalkAndUpdate(true);
@@ -85,7 +84,7 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         doorToBuilding.UpdateMesh(playerWalk, 2);
         zeroToDoor.UpdateMesh(playerWalk, 3);
 
-        windowsSets[currentWinSetIndex].SetMeshes(buildingToSky, doorToBuilding);
+        windowSets[currentWinSetIndex].SetMeshes(buildingToSky, doorToBuilding);
     }
     private void WalkAndUpdate(bool forward)
     {
@@ -98,8 +97,8 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
             int old = currentWinSetIndex;
             currentWinSetIndex = currentWinSetIndex == 0 ? 1 : 0;
 
-            windowsSets[currentWinSetIndex].StartFades(true);
-            windowsSets[old].StartFades(false);
+            windowSets[currentWinSetIndex].StartFades(true);
+            windowSets[old].StartFades(false);
         }
         else if (playerWalk < 0f)
         {

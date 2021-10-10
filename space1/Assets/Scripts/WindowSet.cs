@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Windows : MonoBehaviour
+public class WindowSet : MonoBehaviour
 {
     private Quad[,] quads;
     [SerializeField] private Quad quadPrefab;
@@ -29,7 +29,7 @@ public class Windows : MonoBehaviour
 
     public void SetMeshes(Building building, Building matBuilding)
     {
-        Vector3[] bv = building.vertices;
+        Vector3[] bv = building.getVertices();
 
         for (int x = 0; x < quads.GetLength(0); x++)
         {
