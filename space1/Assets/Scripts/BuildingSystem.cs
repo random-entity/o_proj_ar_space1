@@ -8,23 +8,10 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
     private WindowGroup[] windowGroups;
     [SerializeField] private WindowGroup windowGroupPrefab;
-    private bool currWinGrpBool = false;
-    private int getCurrWinGrpIndex()
-    {
-        return currWinGrpBool ? 1 : 0;
-    }
-    private int getNotCurrWinGrpIndex()
-    {
-        return currWinGrpBool ? 0 : 1;
-    }
-    private int toggleReturnCurrWinGrpBool()
-    {
-        currWinGrpBool = !currWinGrpBool;
-        return getCurrWinGrpIndex();
-    }
+    private int currSkyWinGrpIndex = 0;
     #endregion
 
-    #region fields for Buildings drawing
+    #region fields for Buildings geometry
     public static float centerDir = Mathf.PI * 0.5f; // 빌딩의 중심축이 xz 평면에서 어떤 argument(각) 갖는지.
     public static float[] presetAngWids;
     public static float angWidStepRatio = 16f;
@@ -66,9 +53,10 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
     private void Awake()
     {
         initiateArray<Building>(out buildings, 6, buildingPrefab);
-        initiateArray<WindowGroup>(out windowGroups, 2, windowGroupPrefab);
-        windowGroups[0].InitiateAllAlpha(1f);
-        windowGroups[1].InitiateAllAlpha(0f);
+        initiateArray<WindowGroup>(out windowGroups, 3, windowGroupPrefab);
+        windowGroups[0].InitiateAllAlpha(0f); // sky (match buildingRoleIndices)
+        windowGroups[1].InitiateAllAlpha(1f); // buildingToSky
+        windowGroups[2].InitiateAllAlpha(0f); // doorToBuilding
 
         presetAngWids = new float[4];
         presetAngWids[0] = 2f * Mathf.PI;
@@ -132,9 +120,10 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
 
                 currStep++;
                 currDayPhase++;
+                currSkyWinGrpIndex = (currSkyWinGrpIndex + 1) % 3;
 
-                windowGroups[getCurrWinGrpIndex()].StartFades(false);
-                windowGroups[toggleReturnCurrWinGrpBool()].StartFades(true);
+                windowGroups[currSkyWinGrpIndex].StartFades(false);
+                windowGroups[(currSkyWinGrpIndex + 1) % 3].StartFades(true);
             }
             else // if (playerWalk < 0f)
             {
@@ -142,9 +131,10 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
 
                 currStep += 5;
                 currDayPhase += totalDayPhase - 1;
+                currSkyWinGrpIndex = (currSkyWinGrpIndex + 2) % 3;
 
-                // windowGroups[getCurrWinGrpIndex()].StartFades(false);
-                // windowGroups[toggleReturnCurrWinGrpBool()].StartFades(true);
+                windowGroups[(currSkyWinGrpIndex + 1) % 3].StartFades(true);
+                windowGroups[(currSkyWinGrpIndex + 2) % 3].StartFades(false);
             }
 
             if (currStep >= 6)
@@ -168,7 +158,8 @@ public class BuildingSystem : MonoSingleton<BuildingSystem>
         doorToBuilding.UpdateMesh(playerWalk, 2);
         zeroToDoor.UpdateMesh(playerWalk, 3);
 
-        windowGroups[getCurrWinGrpIndex()].SetMeshes(buildingToSky, doorToBuilding);
-        // windowGroups[getNotCurrWinGrpIndex()].SetMeshes(sky, buildingToSky);
+        windowGroups[currSkyWinGrpIndex].SetMeshes(sky, buildingToSky);
+        windowGroups[(currSkyWinGrpIndex + 1) % 3].SetMeshes(buildingToSky, doorToBuilding);
+        windowGroups[(currSkyWinGrpIndex + 2) % 3].SetMeshes(doorToBuilding, zeroToDoor);
     }
 }
