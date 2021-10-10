@@ -15,6 +15,10 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
     {
         return res;
     }
+    private Material material;
+    public void setMaterialColor(Color c) {
+        material.color = c;
+    }
     #endregion
 
     #region the one definitive field to determine building size & its getter and setter
@@ -25,15 +29,16 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
     }
     #endregion
 
-    private void Start()
+    private void Awake()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+        material = GetComponent<MeshRenderer>().material;
     }
 
     public void UpdateMesh(float factor, int roleIndex) // 0 <= factor < 1
     { 
-        float angWid = BuildingSystem.presetAngWids[0] * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
+        float angWid = Mathf.PI * 2f * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
         float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisStepRatio, 3 - roleIndex + factor);
 
         setAngWid(angWid);
@@ -44,8 +49,7 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
             transform.position = Vector3.up * (radius * angWid * BuildingSystem.angWidToHeight * 4f * (factor - 1f));
         }
     }
-
-    private void UpdateMesh(float angWid, float radius, bool coverTop)
+    private void UpdateMesh(float angWid, float radius, bool coverTop) // 논리 기반의 베이스
     {
         vertices = new Vector3[2 * res + 2];
         for (int i = 0; i <= res; i++)

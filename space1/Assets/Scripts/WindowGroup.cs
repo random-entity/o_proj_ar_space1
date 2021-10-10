@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WindowSet : MonoBehaviour
+public class WindowGroup : MonoBehaviour
 {
     private Quad[,] quads;
     [SerializeField] private Quad quadPrefab;
@@ -11,7 +11,7 @@ public class WindowSet : MonoBehaviour
     private static float top = 0.9f;
     private static float winHeight = (top - bottom) / (2 * yNum - 1);
 
-    private void Start()
+    private void Awake()
     {
         quads = new Quad[1 + (Building.getRes() - 2 * xMargin) / 2, yNum];
 
