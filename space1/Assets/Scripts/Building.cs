@@ -65,6 +65,10 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
         {
             transform.position = Vector3.up * (radius * angWid * BuildingSystem.angWidToHeight * 4f * (factor - 1f));
         }
+        else
+        {
+            transform.position = Vector3.zero;
+        }
     }
     private void UpdateMesh(float angWid, float radius, bool coverTop) // 논리 기반의 베이스
     {
