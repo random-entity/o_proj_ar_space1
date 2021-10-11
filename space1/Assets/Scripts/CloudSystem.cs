@@ -14,18 +14,11 @@ public class CloudSystem : MonoBehaviour
 
     private void Awake()
     {
-        Initialize();
+        initialize();
     }
 
-    public void Initialize()
+    private void initialize()
     {
-        cloudPivots = new CloudPivot[numberOfClouds];
-
-        for (int i = 0; i < numberOfClouds; i++)
-        {
-            CloudPivot ith = Instantiate(cloudPivotPrefab);
-            cloudPivots[i] = ith;
-            ith.transform.SetParent(transform);
-        }
+        Extensions.InitializeArray<CloudPivot>(out cloudPivots, cloudPivotPrefab, numberOfClouds, transform);
     }
 }
