@@ -8,30 +8,34 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
     private Vector3[] vertices;
     private int[] triangles;
     private static int res = 17; // 홀수로 해줘잉
-    public Vector3[] getVertices() {
+    public Vector3[] GetVertices()
+    {
         return vertices;
     }
-    public static int getRes()
+    public static int GetRes()
     {
         return res;
     }
     private Material material;
-    public Material GetMaterial() {
+    public Material GetMaterial()
+    {
         return material;
     }
-    public void setMaterialColor(Color c) {
+    public void SetMaterialColor(Color c)
+    {
         material.color = c;
     }
-    public void setRenderQueue(int order) {
+    public void SetRenderQueue(int order)
+    {
         material.renderQueue = 3000 + order;
     }
     #endregion
 
-    #region the one definitive field to determine building size & its getter and setter
+    #region the one definitive field to determine building size & its setter
     private float angWid;
-    public void setAngWid(float newValue)
+    public void SetAngWid(float newValue)
     {
-        angWid = Mathf.Clamp(newValue, BuildingSystem.presetAngWids[BuildingSystem.presetAngWids.Length - 1], BuildingSystem.presetAngWids[0]);
+        angWid = Mathf.Clamp(newValue, BuildingSystem.presetAngWids[BuildingSystem.presetAngWids.Length - 1], Mathf.PI * 2f /*BuildingSystem.presetAngWids[0]*/);
     }
     #endregion
 
@@ -39,29 +43,33 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+        mesh.MarkDynamic();
+
         material = GetComponent<MeshRenderer>().material;
     }
 
     public void UpdateMesh(float factor, int roleIndex) // 0 <= factor < 1
-    { 
+    {
         float angWid = Mathf.PI * 2f;
-        if(roleIndex != 0) {
+        if (roleIndex != 0) // not sky
+        {
             angWid *= Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
         }
-        // float angWid = Mathf.PI * 2f * Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
+
         float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisStepRatio, 3 - roleIndex + factor);
 
-        setAngWid(angWid);
+        SetAngWid(angWid);
         UpdateMesh(this.angWid, radius, true);
 
         if (roleIndex == 3) // zeroToDoor Building
-        { 
+        {
             transform.position = Vector3.up * (radius * angWid * BuildingSystem.angWidToHeight * 4f * (factor - 1f));
         }
     }
     private void UpdateMesh(float angWid, float radius, bool coverTop) // 논리 기반의 베이스
     {
         vertices = new Vector3[2 * res + 2];
+
         for (int i = 0; i <= res; i++)
         {
             float arg = BuildingSystem.centerDir + angWid * (-0.5f + (float)i / res);
@@ -114,15 +122,5 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (vertices == null) return;
-
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            Gizmos.DrawSphere(vertices[i], 0.1f);
-        }
     }
 }

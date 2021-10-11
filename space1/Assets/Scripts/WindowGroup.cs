@@ -13,7 +13,7 @@ public class WindowGroup : MonoBehaviour
 
     private void Awake()
     {
-        quads = new Quad[1 + (Building.getRes() - 2 * xMargin) / 2, yNum];
+        quads = new Quad[1 + (Building.GetRes() - 2 * xMargin) / 2, yNum];
 
         for (int x = 0; x < quads.GetLength(0); x++)
         {
@@ -29,7 +29,7 @@ public class WindowGroup : MonoBehaviour
 
     public void SetMeshes(Building building, Building matBuilding)
     {
-        Vector3[] bv = building.getVertices();
+        Vector3[] bv = building.GetVertices();
 
         for (int x = 0; x < quads.GetLength(0); x++)
         {
@@ -43,7 +43,7 @@ public class WindowGroup : MonoBehaviour
             // for (int i = 0; i < bvs.Length; i++)
             // {
             //     bvs[i] = Vector3.Lerp(bvs[i], Vector3.up * bvs[i].y, 0.05f);
-            // }
+            // } // Shader RenderQueue 세팅으로 해결
 
             for (int y = 0; y < quads.GetLength(1); y++)
             {

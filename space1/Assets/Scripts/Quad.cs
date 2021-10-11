@@ -19,7 +19,7 @@ public class Quad : MonoBehaviour
         mesh.vertices = vertices;
         mesh.triangles = new int[] { 0, 2, 1, 1, 2, 3 };
         mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
+        // mesh.RecalculateBounds();
     }
 
     public void setMaterialPreserveAlpha(Material newMaterial) // Quad instance의 material 새로 지정할 때는 꼭 이걸 써주세요~~!!!!!!!!
@@ -45,7 +45,7 @@ public class Quad : MonoBehaviour
     {
         yield return new WaitForSeconds(wait);
 
-        for (float fadeAlpha = on ? 0f : 1f; 0 <= fadeAlpha && fadeAlpha <= 1; fadeAlpha += on ? 0.04f : -0.02f)
+        for (float fadeAlpha = mr.material.color.a; 0 <= fadeAlpha && fadeAlpha <= 1; fadeAlpha += on ? 0.04f : -0.02f)
         {
             Color c = mr.material.color;
             c.a = fadeAlpha;
