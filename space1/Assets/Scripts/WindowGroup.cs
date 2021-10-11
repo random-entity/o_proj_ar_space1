@@ -69,7 +69,7 @@ public class WindowGroup : MonoBehaviour
         }
     }
 
-    public void InitiateAllAlpha(float initAlpha)
+    public void InitializeAllAlpha(float initAlpha)
     {
         foreach (Quad quad in quads)
         {
