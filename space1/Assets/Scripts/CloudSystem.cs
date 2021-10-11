@@ -12,13 +12,15 @@ public class CloudSystem : MonoBehaviour
         return Random.Range(minRotationSpeed, maxRotationSpeed) * (Random.Range(0f, 1f) < 0.5f ? 1f : -1f);
     }
 
-    private void Awake() {
+    private void Awake()
+    {
         Initialize();
     }
 
-    public void Initialize() {
+    public void Initialize()
+    {
         cloudPivots = new CloudPivot[numberOfClouds];
-        
+
         for (int i = 0; i < numberOfClouds; i++)
         {
             CloudPivot ith = Instantiate(cloudPivotPrefab);
