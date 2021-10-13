@@ -6,131 +6,71 @@ public class BuildingSystem : MonoBehaviour
     private Building[] buildings;
     [SerializeField] private Building buildingPrefab;
     private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
-    private WindowGroup[] windowGroups;
-    [SerializeField] private WindowGroup windowGroupPrefab;
-    private int currSkyWinGrpIndex = 0;
     #endregion
 
-    #region fields for Buildings geometry
-    public static float centerDir = Mathf.PI * 0.5f; // 빌딩의 중심축이 xz 평면에서 어떤 argument(각) 갖는지.
-    public static float[] presetAngWids;
+    #region fields for Buildings geometry & color
     public static float angWidStepRatio = 16f;
-    public static float raduisStepRatio = 1.1f;
-    public static float angWidToHeight = 1.5f;
+    private static Color[] colors;
     #endregion
 
     #region fields for processing player control input
-    private float playerSpeed = 0.3f;
-    private float playerWalk = 0f; // 1f가 되면 한 페이즈 종료.
-    private int currStep = 0; // private static int totalStep = 3 * 2;
-    private int currDayPhase = 0;
-    public static int totalDayPhase = 4;
-    private static Color[] palette;
-    private Color getColorFromDayPhase(int dayPhase)
-    {
-        if (dayPhase < 0)
-        {
-            Debug.Log("getColorFromDayPhase() : argument < 0");
-            return Color.magenta;
-        }
-
-        else return palette[dayPhase % palette.Length];
-    }
-    #endregion
-
-    #region helper functions
-    private void initiateArray<T>(out T[] array, int size, T prefab) where T : MonoBehaviour
-    {
-        array = new T[size];
-        for (int i = 0; i < size; i++)
-        {
-            T ith = Instantiate(prefab);
-            array[i] = ith;
-            ith.transform.SetParent(transform);
-        }
-    }
+    private int currSkyBldgIndex = 0;
+    private static int totalBldg = 3 * 2;
+    private int currSkyColorIndex = 0;
+    private static int totalColor = 4;
     #endregion
 
     private void Awake()
     {
-        initiateArray<Building>(out buildings, 6, buildingPrefab);
-        initiateArray<WindowGroup>(out windowGroups, 3, windowGroupPrefab);
-        windowGroups[0].InitiateAllAlpha(0f); // sky (match buildingRoleIndex)
-        windowGroups[1].InitiateAllAlpha(1f); // buildingToSky (match buildingRoleIndex)
-        windowGroups[2].InitiateAllAlpha(0f); // doorToBuilding (match buildingRoleIndex)
+        Extensions.InitializeArray<Building>(out buildings, buildingPrefab, 6, transform);
+        buildings[1].InitializeWindowAlphas(1f);
 
-        presetAngWids = new float[4];
-        presetAngWids[0] = 2f * Mathf.PI;
-        for (int i = 1; i < presetAngWids.Length; i++)
+        colors = PaletteContainer.instance.palette.colors;
+        if (colors.Length != BuildingSystem.totalColor)
         {
-            presetAngWids[i] = presetAngWids[i - 1] / angWidStepRatio;
+            Debug.LogWarning("palette.Length != BuildingSystem.totalColor");
         }
-
-        palette = Palette.instance.palette;
 
         SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive();
-        WalkAndUpdate(true);
+        UpdateBuildingsMesh();
     }
 
-    private void Update()
+    #region event listening methods and event subscriptions
+    void OnWalkerStageSwitch(bool forward)
     {
-        if (Input.GetKey(KeyCode.W))
+        int add = forward ? 1 : -1;
+
+        Extensions.SafeModuloAdd(ref currSkyBldgIndex, add, totalBldg);
+        Extensions.SafeModuloAdd(ref currSkyColorIndex, add, totalColor);
+
+        SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive();
+
+        if (forward)
         {
-            WalkAndUpdate(true);
+            sky.StartFade(false);
+            buildingToSky.StartFade(true);
         }
-        else if (Input.GetKey(KeyCode.S))
+        else
         {
-            WalkAndUpdate(false);
-        }
-    }
-
-    private void WalkAndUpdate(bool forward)
-    {
-        Walk(forward);
-
-        UpdateBuildingsAndWindowGroupsMesh();
-    }
-    private void Walk(bool forward)
-    {
-        playerWalk += (forward ? 1f : -1f) * playerSpeed * Time.deltaTime;
-
-        if (playerWalk >= 1f || playerWalk < 0f)
-        {
-            if (playerWalk >= 1f)
-            {
-                playerWalk %= 1f;
-
-                currStep++;
-                currDayPhase++;
-                currSkyWinGrpIndex = (currSkyWinGrpIndex + 1) % 3;
-
-                windowGroups[currSkyWinGrpIndex].StartFades(false);
-                windowGroups[(currSkyWinGrpIndex + 1) % 3].StartFades(true);
-            }
-            else // if (playerWalk < 0f)
-            {
-                playerWalk += 1f;
-
-                currStep += 5;
-                currDayPhase += totalDayPhase - 1;
-                currSkyWinGrpIndex = (currSkyWinGrpIndex + 2) % 3;
-
-                windowGroups[(currSkyWinGrpIndex + 1) % 3].StartFades(true);
-                windowGroups[(currSkyWinGrpIndex + 2) % 3].StartFades(false);
-            }
-
-            if (currStep >= 6)
-            {
-                currStep %= 6;
-            }
-            if (currDayPhase >= totalDayPhase)
-            {
-                currDayPhase %= totalDayPhase;
-            }
-
-            SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive();
+            buildingToSky.StartFade(true);
+            doorToBuilding.StartFade(false);
         }
     }
+    private void OnWalkerProgress()
+    {
+        UpdateBuildingsMesh();
+    }
+    private void OnEnable()
+    {
+        Walker.ProgressAlert += OnWalkerProgress;
+        Walker.StageSwitchAlert += OnWalkerStageSwitch;
+    }
+    private void OnDisable()
+    {
+        Walker.ProgressAlert -= OnWalkerProgress;
+        Walker.StageSwitchAlert -= OnWalkerStageSwitch;
+    }
+    #endregion
 
     #region set buildings RoleIndices / Color / RenderQueue / Active (call when step change)
     private void SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive()
@@ -142,26 +82,32 @@ public class BuildingSystem : MonoBehaviour
     }
     private void SetBuildingsRoleIndices()
     {
-        sky = buildings[currStep];
-        buildingToSky = buildings[(currStep + 1) % 6];
-        doorToBuilding = buildings[(currStep + 2) % 6];
-        zeroToDoor = buildings[(currStep + 3) % 6];
-        unseen1 = buildings[(currStep + 4) % 6];
-        unseen2 = buildings[(currStep + 5) % 6];
+        sky = Extensions.SafeGet<Building>(buildings, currSkyBldgIndex);
+        buildingToSky = Extensions.SafeGet<Building>(buildings, currSkyBldgIndex + 1);
+        doorToBuilding = Extensions.SafeGet<Building>(buildings, currSkyBldgIndex + 2);
+        zeroToDoor = Extensions.SafeGet<Building>(buildings, currSkyBldgIndex + 3);
+        unseen1 = Extensions.SafeGet<Building>(buildings, currSkyBldgIndex + 4);
+        unseen2 = Extensions.SafeGet<Building>(buildings, currSkyBldgIndex + 5);
     }
     private void SetBuildingsColor()
     {
-        sky.SetMaterialColor(getColorFromDayPhase(currDayPhase));
-        buildingToSky.SetMaterialColor(getColorFromDayPhase(currDayPhase + 1));
-        doorToBuilding.SetMaterialColor(getColorFromDayPhase(currDayPhase + 2));
-        zeroToDoor.SetMaterialColor(getColorFromDayPhase(currDayPhase + 3));
+        Color skyCol = Extensions.SafeGet<Color>(colors, currSkyColorIndex);
+        Color buildingToSkyCol = Extensions.SafeGet<Color>(colors, currSkyColorIndex + 1);
+        Color doorToBuildingCol = Extensions.SafeGet<Color>(colors, currSkyColorIndex + 2);
+        Color zeroToDoorCol = Extensions.SafeGet<Color>(colors, currSkyColorIndex + 3);
+
+        sky.SetColors(skyCol, buildingToSkyCol);
+        buildingToSky.SetColors(buildingToSkyCol, doorToBuildingCol);
+        doorToBuilding.SetColors(doorToBuildingCol, zeroToDoorCol);
+        zeroToDoor.SetColors(zeroToDoorCol, Color.black);
     }
     private void SetBuildingsRenderQueue()
     {
-        sky.SetRenderQueue(0);
-        buildingToSky.SetRenderQueue(1);
-        doorToBuilding.SetRenderQueue(2);
-        zeroToDoor.SetRenderQueue(3);
+        sky.SetRenderQueue(3000);
+        // clouds가 3001
+        buildingToSky.SetRenderQueue(3002);
+        doorToBuilding.SetRenderQueue(3003);
+        zeroToDoor.SetRenderQueue(3004);
     }
     private void SetBuildingsActive()
     {
@@ -173,25 +119,14 @@ public class BuildingSystem : MonoBehaviour
         unseen2.gameObject.SetActive(false);
     }
     #endregion
-    
-    #region set buildings & windowGroups Mesh (call every frame where user moves)
-    private void UpdateBuildingsAndWindowGroupsMesh()
-    {
-        UpdateBuildingsMesh();
-        UpdateWindowGroupsMesh();
-    }
+
+    #region set buildings Mesh (call every frame where user moves)
     private void UpdateBuildingsMesh()
     {
-        sky.UpdateMesh(playerWalk, 0);
-        buildingToSky.UpdateMesh(playerWalk, 1);
-        doorToBuilding.UpdateMesh(playerWalk, 2);
-        zeroToDoor.UpdateMesh(playerWalk, 3);
-    }
-    private void UpdateWindowGroupsMesh()
-    {
-        windowGroups[currSkyWinGrpIndex].SetMeshes(sky, buildingToSky);
-        windowGroups[(currSkyWinGrpIndex + 1) % 3].SetMeshes(buildingToSky, doorToBuilding);
-        windowGroups[(currSkyWinGrpIndex + 2) % 3].SetMeshes(doorToBuilding, zeroToDoor);
+        sky.UpdateMesh(Walker.progress, 0);
+        buildingToSky.UpdateMesh(Walker.progress, 1);
+        doorToBuilding.UpdateMesh(Walker.progress, 2);
+        zeroToDoor.UpdateMesh(Walker.progress, 3);
     }
     #endregion
 }

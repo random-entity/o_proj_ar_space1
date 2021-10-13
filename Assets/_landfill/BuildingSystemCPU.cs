@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class BuildingSystem : MonoBehaviour
+public class BuildingSystemCPU : MonoBehaviour
 {
     #region fields for Buildings config
-    private Building[] buildings;
-    [SerializeField] private Building buildingPrefab;
-    private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
-    private WindowGroup[] windowGroups;
-    [SerializeField] private WindowGroup windowGroupPrefab;
+    private BuildingCPU[] buildings;
+    [SerializeField] private BuildingCPU buildingPrefab;
+    private BuildingCPU sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
+    private WindowGroupCPU[] windowGroups;
+    [SerializeField] private WindowGroupCPU windowGroupPrefab;
     #endregion
 
     #region fields for Buildings geometry & color
@@ -43,8 +43,8 @@ public class BuildingSystem : MonoBehaviour
 
     private void Awake()
     {
-        Extensions.InitializeArray<Building>(out buildings, buildingPrefab, 6, transform);
-        Extensions.InitializeArray<WindowGroup>(out windowGroups, windowGroupPrefab, 3, transform, (wg) => { wg.InitializeAllAlpha(0f); });
+        Extensions.InitializeArray<BuildingCPU>(out buildings, buildingPrefab, 6, transform);
+        Extensions.InitializeArray<WindowGroupCPU>(out windowGroups, windowGroupPrefab, 3, transform, (wg) => { wg.InitializeAllAlpha(0f); });
         windowGroups[1].InitializeAllAlpha(1f); // buildingToSky (match to buildingRoleIndex)
 
         presetAngWids = new float[4];
@@ -55,7 +55,7 @@ public class BuildingSystem : MonoBehaviour
         }
 
         colors = PaletteContainer.instance.palette.colors;
-        if (colors.Length != BuildingSystem.totalColor)
+        if (colors.Length != BuildingSystemCPU.totalColor)
         {
             Debug.LogWarning("palette.Length != BuildingSystem.totalColor");
         }
@@ -69,9 +69,9 @@ public class BuildingSystem : MonoBehaviour
     {
         int add = forward ? 1 : -1;
 
-        Extensions.ModuloAdd(ref currSkyBldgIndex, add, totalBldg);
-        Extensions.ModuloAdd(ref currSkyColorIndex, add, totalColor);
-        Extensions.ModuloAdd(ref currSkyWinGrpIndex, add, totalWinGrp);
+        Extensions.SafeModuloAdd(ref currSkyBldgIndex, add, totalBldg);
+        Extensions.SafeModuloAdd(ref currSkyColorIndex, add, totalColor);
+        Extensions.SafeModuloAdd(ref currSkyWinGrpIndex, add, totalWinGrp);
 
         if (forward)
         {
