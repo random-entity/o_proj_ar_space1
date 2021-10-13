@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class BuildingSystemGPU : MonoBehaviour
+public class BuildingSystemCPU : MonoBehaviour
 {
     #region fields for Buildings config
-    private BuildingGPU[] buildings;
-    [SerializeField] private BuildingGPU buildingPrefab;
-    private BuildingGPU sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
-    private WindowGroup[] windowGroups;
-    [SerializeField] private WindowGroup windowGroupPrefab;
+    private BuildingCPU[] buildings;
+    [SerializeField] private BuildingCPU buildingPrefab;
+    private BuildingCPU sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
+    private WindowGroupCPU[] windowGroups;
+    [SerializeField] private WindowGroupCPU windowGroupPrefab;
     #endregion
 
     #region fields for Buildings geometry & color
@@ -43,8 +43,8 @@ public class BuildingSystemGPU : MonoBehaviour
 
     private void Awake()
     {
-        Extensions.InitializeArray<BuildingGPU>(out buildings, buildingPrefab, 6, transform);
-        Extensions.InitializeArray<WindowGroup>(out windowGroups, windowGroupPrefab, 3, transform, (wg) => { wg.InitializeAllAlpha(0f); });
+        Extensions.InitializeArray<BuildingCPU>(out buildings, buildingPrefab, 6, transform);
+        Extensions.InitializeArray<WindowGroupCPU>(out windowGroups, windowGroupPrefab, 3, transform, (wg) => { wg.InitializeAllAlpha(0f); });
         windowGroups[1].InitializeAllAlpha(1f); // buildingToSky (match to buildingRoleIndex)
 
         presetAngWids = new float[4];
@@ -55,7 +55,7 @@ public class BuildingSystemGPU : MonoBehaviour
         }
 
         colors = PaletteContainer.instance.palette.colors;
-        if (colors.Length != BuildingSystemGPU.totalColor)
+        if (colors.Length != BuildingSystemCPU.totalColor)
         {
             Debug.LogWarning("palette.Length != BuildingSystem.totalColor");
         }
@@ -69,9 +69,9 @@ public class BuildingSystemGPU : MonoBehaviour
     {
         int add = forward ? 1 : -1;
 
-        Extensions.ModuloAdd(ref currSkyBldgIndex, add, totalBldg);
-        Extensions.ModuloAdd(ref currSkyColorIndex, add, totalColor);
-        Extensions.ModuloAdd(ref currSkyWinGrpIndex, add, totalWinGrp);
+        Extensions.SafeModuloAdd(ref currSkyBldgIndex, add, totalBldg);
+        Extensions.SafeModuloAdd(ref currSkyColorIndex, add, totalColor);
+        Extensions.SafeModuloAdd(ref currSkyWinGrpIndex, add, totalWinGrp);
 
         if (forward)
         {
@@ -127,6 +127,10 @@ public class BuildingSystemGPU : MonoBehaviour
     }
     private void SetBuildingsRenderQueue()
     {
+        sky.SetRenderQueue(0);
+        buildingToSky.SetRenderQueue(1);
+        doorToBuilding.SetRenderQueue(2);
+        zeroToDoor.SetRenderQueue(3);
     }
     private void SetBuildingsActive()
     {
@@ -147,16 +151,16 @@ public class BuildingSystemGPU : MonoBehaviour
     }
     private void UpdateBuildingsMesh()
     {
-        sky.UpdateMeshByWalkProgress(Walker.progress, 0);
-        buildingToSky.UpdateMeshByWalkProgress(Walker.progress, 1);
-        doorToBuilding.UpdateMeshByWalkProgress(Walker.progress, 2);
-        zeroToDoor.UpdateMeshByWalkProgress(Walker.progress, 3);
+        sky.UpdateMesh(Walker.progress, 0);
+        buildingToSky.UpdateMesh(Walker.progress, 1);
+        doorToBuilding.UpdateMesh(Walker.progress, 2);
+        zeroToDoor.UpdateMesh(Walker.progress, 3);
     }
     private void UpdateWindowGroupsMesh()
     {
-        // windowGroups[currSkyWinGrpIndex].SetMeshes(sky, buildingToSky);
-        // windowGroups[(currSkyWinGrpIndex + 1) % 3].SetMeshes(buildingToSky, doorToBuilding);
-        // windowGroups[(currSkyWinGrpIndex + 2) % 3].SetMeshes(doorToBuilding, zeroToDoor);
+        windowGroups[currSkyWinGrpIndex].SetMeshes(sky, buildingToSky);
+        windowGroups[(currSkyWinGrpIndex + 1) % 3].SetMeshes(buildingToSky, doorToBuilding);
+        windowGroups[(currSkyWinGrpIndex + 2) % 3].SetMeshes(doorToBuilding, zeroToDoor);
     }
     #endregion
 }

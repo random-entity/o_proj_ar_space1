@@ -1,102 +1,83 @@
+using System;
+using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
 public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
 {
-    #region fields (+ getters) for mesh generation
+    #region fields for mesh generation
     private Mesh mesh;
     private Vector3[] vertices;
+    private Vector2[] uvs;
     private int[] triangles;
-    private static int res = 17; // 홀수로 해줘잉
-    public Vector3[] GetVertices()
-    {
-        return vertices;
-    }
-    public static int GetRes()
-    {
-        return res;
-    }
+    private static readonly int res = 150; // 홀수로 해줘잉
     private Material material;
-    public Material GetMaterial()
-    {
-        return material;
-    }
-    public void SetMaterialColor(Color c)
-    {
-        material.color = c;
-    }
-    public void SetRenderQueue(int order)
-    {
-        material.renderQueue = 3000 + order;
-    }
     #endregion
 
-    #region the one definitive field to determine building size & its setter
-    private float angWid;
-    public void SetAngWid(float newValue)
-    {
-        angWid = Mathf.Clamp(newValue, BuildingSystem.presetAngWids[BuildingSystem.presetAngWids.Length - 1], Mathf.PI * 2f /*BuildingSystem.presetAngWids[0]*/);
-    }
+    #region fields for windows
+    private int[] permutation;
+    private float[] windowAlphas;
     #endregion
 
     private void Awake()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
-        mesh.MarkDynamic();
 
         material = GetComponent<MeshRenderer>().material;
+
+        initializeMesh();
+
+        permutation = Enumerable.Range(0, 100).ToArray<int>();
+        windowAlphas = new float[100];
+
+        InitializeWindowAlphas(0f);
     }
 
-    public void UpdateMesh(float factor, int roleIndex) // 0 <= factor < 1
+    public void InitializeWindowAlphas(float initAlpha)
     {
-        float angWid = Mathf.PI * 2f;
-        if (roleIndex != 0) // not sky
+        for (int i = 0; i < windowAlphas.Length; i++)
         {
-            angWid *= Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + factor);
+            windowAlphas[i] = initAlpha;
         }
 
-        float radius = EnvSpecs.landRadius * Mathf.Pow(BuildingSystem.raduisStepRatio, 3 - roleIndex + factor);
-
-        SetAngWid(angWid);
-        UpdateMesh(this.angWid, radius, true);
-
-        if (roleIndex == 3) // zeroToDoor Building
-        {
-            transform.position = Vector3.up * (radius * angWid * BuildingSystem.angWidToHeight * 4f * (factor - 1f));
-        }
-        else
-        {
-            transform.position = Vector3.zero;
-        }
+        material.SetFloatArray("_WindowAlphas", windowAlphas);
     }
-    private void UpdateMesh(float angWid, float radius, bool coverTop) // 논리 기반의 베이스
+    private void initializeMesh()
     {
         vertices = new Vector3[2 * res + 2];
 
+        float radius = EnvSpecs.landRadius;
+
         for (int i = 0; i <= res; i++)
         {
-            float arg = BuildingSystem.centerDir + angWid * (-0.5f + (float)i / res);
+            // vertex shader가 위치 세팅 해줘서 여기서 설정할 필요가 없으나 mesh의 bound가 좁으면 렌더링 시 시야에 없으면 무시해버림. 원통형 방어벽을 쳐준다.
+            float arg = Mathf.PI * 2f * ((float)i / res);
 
             float x = radius * Mathf.Cos(arg);
-            float y = -1f;
+            float y = -radius * BuildingSystemCPU.angWidToHeight * Mathf.PI * 2f;
             float z = radius * Mathf.Sin(arg);
 
             vertices[2 * i] = new Vector3(x, y, z);
 
-            y = radius * BuildingSystem.angWidToHeight * angWid;
+            y *= -1f;
 
             vertices[2 * i + 1] = new Vector3(x, y, z);
+
+            vertices[i] = Vector3.zero;
         }
 
-        if (coverTop)
+        uvs = new Vector2[vertices.Length];
+
+        for (int i = 0; i <= res; i++)
         {
-            triangles = new int[3 * 2 * res + 3 * (res - 1)];
+            uvs[2 * i] = new Vector2((float)i / (res - 1), 0f);
+            uvs[2 * i + 1] = new Vector2((float)i / (res - 1), 1f);
         }
-        else
-        {
-            triangles = new int[3 * 2 * res];
-        }
+
+        triangles = new int[3 * 2 * res + 3 * (res - 1)];
+
         for (int i = 0; i <= res - 1; i++)
         {
             int v0 = 2 * i;
@@ -111,20 +92,62 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
             triangles[6 * i + 4] = v2;
             triangles[6 * i + 5] = v3;
         }
-        if (coverTop)
+        for (int i = 0; i <= res - 2; i++)
         {
-            for (int i = 0; i <= res - 2; i++)
-            {
-                triangles[6 * res + 3 * i] = 1;
-                triangles[6 * res + 3 * i + 1] = 2 * i + 3;
-                triangles[6 * res + 3 * i + 2] = 2 * i + 5;
-            }
+            triangles[6 * res + 3 * i] = 1;
+            triangles[6 * res + 3 * i + 1] = 2 * i + 3;
+            triangles[6 * res + 3 * i + 2] = 2 * i + 5;
         }
 
-        mesh.Clear();
-
         mesh.vertices = vertices;
+        mesh.uv = uvs;
         mesh.triangles = triangles;
-        mesh.RecalculateNormals();
+    }
+    public void UpdateMesh(float walkerProgress, int roleIndex) // 0 <= walkerProgress < 1
+    {
+        float angWid = Mathf.PI * 2f;
+        if (roleIndex != 0) // not sky
+        {
+            angWid *= Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + walkerProgress);
+        }
+        material.SetFloat("_AngWid", angWid);
+
+        if (roleIndex == 3) // zeroToDoor Building
+        {
+            transform.position = Vector3.up * (angWid * 80/*Building.shader's AngWidToHeight, to get height of the building*/ * 4f * (walkerProgress - 1f));
+        }
+        else
+        {
+            transform.position = Vector3.zero;
+        }
+    }
+    public void SetRenderQueue(int renderQueue)
+    {
+        material.renderQueue = renderQueue;
+    }
+    public void SetColors(Color buildingColor, Color windowColor)
+    {
+        material.SetColor("_Color", buildingColor);
+        material.SetColor("_WindowColor", windowColor);
+    }
+    private IEnumerator fade(bool on, float interval)
+    {
+        Extensions.Shuffle(ref permutation);
+
+        for (int i = 0; i < 2 * permutation.Length; i++)
+        {
+            for (int j = 0; j < Math.Min(i, permutation.Length); j++)
+            {
+                windowAlphas[permutation[j]] += on ? 0.04f : -0.02f;
+                windowAlphas[permutation[j]] = Mathf.Clamp(windowAlphas[permutation[j]], 0f, 1f);
+            }
+            material.SetFloatArray("_WindowAlphas", windowAlphas);
+            yield return new WaitForSeconds(interval);
+        }
+    }
+    public void StartFade(bool on)
+    {
+        StopAllCoroutines();
+        StartCoroutine(fade(on, 0.02f));
     }
 }

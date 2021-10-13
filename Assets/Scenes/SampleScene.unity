@@ -214,7 +214,7 @@ PrefabInstance:
     - target: {fileID: 1101161836955826148, guid: 5b1b4a447a6b04093829e31c9ef560a3, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 0597ede5504ed4eae8c08ce4adb6aa7e, type: 2}
+      objectReference: {fileID: 2100000, guid: 4a3478ad714d6493f91b4887c2fb7787, type: 2}
     - target: {fileID: 1101161836955826149, guid: 5b1b4a447a6b04093829e31c9ef560a3, type: 3}
       propertyPath: m_Name
       value: BuildingGPU (1)
@@ -237,7 +237,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1101161836955826154, guid: 5b1b4a447a6b04093829e31c9ef560a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -33.3
+      value: 42.5
       objectReference: {fileID: 0}
     - target: {fileID: 1101161836955826154, guid: 5b1b4a447a6b04093829e31c9ef560a3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -772,7 +772,7 @@ GameObject:
   - component: {fileID: 1957519055}
   - component: {fileID: 1957519054}
   m_Layer: 0
-  m_Name: BuildingSystemGPU
+  m_Name: BuildingSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -791,7 +791,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingPrefab: {fileID: 1322891884224940139, guid: 5b1b4a447a6b04093829e31c9ef560a3, type: 3}
-  windowGroupPrefab: {fileID: 6742004886744046930, guid: ab3da4de89f934769b22e32d9a3d8021, type: 3}
 --- !u!4 &1957519055
 Transform:
   m_ObjectHideFlags: 0

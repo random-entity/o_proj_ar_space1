@@ -7,20 +7,19 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Building 1
-  m_Shader: {fileID: 4800000, guid: 819268135cf7f4d4ca88ddc79d75f2c4, type: 3}
+  m_Name: Cloud
+  m_Shader: {fileID: 4800000, guid: c43738342b8ad42ecb85ad2d5911b394, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3001
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs: []
-    m_Floats:
-    - _AngWid: 3.32
+    m_Floats: []
     m_Colors:
-    - _Color: {r: 0.5377358, g: 0.2967693, b: 0.2967693, a: 0.5176471}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

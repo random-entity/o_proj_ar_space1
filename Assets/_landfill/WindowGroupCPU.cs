@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WindowGroup : MonoBehaviour
+public class WindowGroupCPU : MonoBehaviour
 {
     private Quad[,] quads;
     [SerializeField] private Quad quadPrefab;
@@ -13,7 +13,7 @@ public class WindowGroup : MonoBehaviour
 
     private void Awake()
     {
-        quads = new Quad[1 + (Building.GetRes() - 2 * xMargin) / 2, yNum];
+        quads = new Quad[1 + (BuildingCPU.GetRes() - 2 * xMargin) / 2, yNum];
 
         for (int x = 0; x < quads.GetLength(0); x++)
         {
@@ -27,7 +27,7 @@ public class WindowGroup : MonoBehaviour
         }
     }
 
-    public void SetMeshes(Building building, Building matBuilding)
+    public void SetMeshes(BuildingCPU building, BuildingCPU matBuilding)
     {
         Vector3[] bv = building.GetVertices();
 

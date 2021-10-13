@@ -20,7 +20,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Floats:
-    - _AngWid: 3.32
+    - _AngWid: 1
+    - _NumWinX: 8
+    - _NumWinY: 8
     m_Colors:
     - _Color: {r: 0.735849, g: 0.44775718, b: 0.44775718, a: 1}
+    - _WindowColor: {r: 1, g: 0.93701136, b: 0, a: 1}
+    - _WindowMargin: {r: 0.1, g: 0.1, b: 0.2, a: 0.1}
   m_BuildTextureStacks: []
