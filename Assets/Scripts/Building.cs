@@ -56,7 +56,7 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
             float arg = Mathf.PI * 2f * ((float)i / res);
 
             float x = radius * Mathf.Cos(arg);
-            float y = -radius * BuildingSystemCPU.angWidToHeight * Mathf.PI * 2f;
+            float y = -radius * 80 * Mathf.PI * 2f;
             float z = radius * Mathf.Sin(arg);
 
             vertices[2 * i] = new Vector3(x, y, z);

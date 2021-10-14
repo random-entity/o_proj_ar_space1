@@ -15,7 +15,7 @@ public class CloudPivot : MonoBehaviour
         float argDegree = arg * 180f;
         arg *= Mathf.PI;
 
-        cloud.localPosition = new Vector3(r * Mathf.Cos(arg), Random.Range(20f, 80f), r * Mathf.Sin(arg));
+        cloud.localPosition = new Vector3(r * Mathf.Cos(arg), Random.Range(7.5f, 100f), r * Mathf.Sin(arg));
         cloud.localRotation = Quaternion.Euler(0f, 90f - argDegree, 90f /*이 z값은 캡슐이 세로로 서 있어서*/);
         cloud.localScale *= Random.Range(1f, 4f);
 
