@@ -21,11 +21,12 @@ public class CloudPivot : MonoBehaviour
 
         rotationSpeed = CloudSystem.getRandomSpeed();
     }
+    public void SetMaterial(Material material)
+    {
+        cloud.GetComponent<MeshRenderer>().material = material;
+    }
     private void Update()
     {
-        move();
-    }
-    private void move() {
         transform.Rotate(0f, rotationSpeed * Time.deltaTime, 0f, Space.World);
     }
 }

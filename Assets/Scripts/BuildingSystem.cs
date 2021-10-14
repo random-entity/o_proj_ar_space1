@@ -6,6 +6,7 @@ public class BuildingSystem : MonoBehaviour
     private Building[] buildings;
     [SerializeField] private Building buildingPrefab;
     private Building sky, buildingToSky, doorToBuilding, zeroToDoor, unseen1, unseen2;
+    public static readonly int renderQueueSky = 3000, renderQueuebuildingToSky = 3002, renderQueuedoorToBuilding = 3004, renderQueuezeroToDoor = 3005;
     #endregion
 
     #region fields for Buildings geometry & color
@@ -13,7 +14,7 @@ public class BuildingSystem : MonoBehaviour
     private static Color[] colors;
     #endregion
 
-    #region fields for processing player control input
+    #region index fields for processing player control input
     private int currSkyBldgIndex = 0;
     private static int totalBldg = 3 * 2;
     private int currSkyColorIndex = 0;
@@ -31,7 +32,7 @@ public class BuildingSystem : MonoBehaviour
             Debug.LogWarning("palette.Length != BuildingSystem.totalColor");
         }
 
-        SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive();
+        SetBuildingsRoleIndexAndColorAndRenderQueueAndActive();
         UpdateBuildingsMesh();
     }
 
@@ -43,7 +44,7 @@ public class BuildingSystem : MonoBehaviour
         Extensions.SafeModuloAdd(ref currSkyBldgIndex, add, totalBldg);
         Extensions.SafeModuloAdd(ref currSkyColorIndex, add, totalColor);
 
-        SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive();
+        SetBuildingsRoleIndexAndColorAndRenderQueueAndActive();
 
         if (forward)
         {
@@ -73,7 +74,7 @@ public class BuildingSystem : MonoBehaviour
     #endregion
 
     #region set buildings RoleIndices / Color / RenderQueue / Active (call when step change)
-    private void SetBuildingsRoleIndicesAndColorAndRenderQueueAndActive()
+    private void SetBuildingsRoleIndexAndColorAndRenderQueueAndActive()
     {
         SetBuildingsRoleIndices();
         SetBuildingsColor();
@@ -103,11 +104,10 @@ public class BuildingSystem : MonoBehaviour
     }
     private void SetBuildingsRenderQueue()
     {
-        sky.SetRenderQueue(3000);
-        // clouds가 3001
-        buildingToSky.SetRenderQueue(3002);
-        doorToBuilding.SetRenderQueue(3003);
-        zeroToDoor.SetRenderQueue(3004);
+        sky.SetRenderQueue(renderQueueSky);
+        buildingToSky.SetRenderQueue(renderQueuebuildingToSky);
+        doorToBuilding.SetRenderQueue(renderQueuedoorToBuilding);
+        zeroToDoor.SetRenderQueue(renderQueuezeroToDoor);
     }
     private void SetBuildingsActive()
     {
