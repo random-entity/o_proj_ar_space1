@@ -9,23 +9,23 @@ public class Walker : MonoBehaviour
     public static event BoolAlert StageSwitchAlert;
     #endregion
 
-    public static float progress = 0f;
+    public static float Progress = 0f;
     private static float speed = 0.25f;
 
     private void walk(bool forward)
     {
-        progress += (forward ? 1f : -1f) * speed * Time.deltaTime;
+        Progress += (forward ? 1f : -1f) * speed * Time.deltaTime;
 
-        if (progress >= 1f || progress < 0f)
+        if (Progress >= 1f || Progress < 0f)
         {
-            if (progress >= 1f)
+            if (Progress >= 1f)
             {
-                progress %= 1f;
+                Progress %= 1f;
                 StageSwitchAlert(true);
             }
             else // if (playerWalk < 0f)
             {
-                progress += 1f;
+                Progress += 1f;
                 StageSwitchAlert(false);
             }
         }
@@ -35,16 +35,16 @@ public class Walker : MonoBehaviour
     {
         if (input == 0) return;
 
-        progress += input * speed * Time.deltaTime;
+        Progress += input * speed * Time.deltaTime;
 
-        if (progress >= 1f)
+        if (Progress >= 1f)
         {
-            progress -= 1f;
+            Progress -= 1f;
             StageSwitchAlert(true);
         }
-        else if (progress < 0f)
+        else if (Progress < 0f)
         {
-            progress += 1f;
+            Progress += 1f;
             StageSwitchAlert(false);
         }
 
@@ -54,16 +54,5 @@ public class Walker : MonoBehaviour
     void Update()
     {
         walk(Input.GetAxis("Vertical"));
-
-        // if (Input.GetKey(KeyCode.W))
-        // {
-        //     walk(true);
-        //     ProgressAlert();
-        // }
-        // else if (Input.GetKey(KeyCode.S))
-        // {
-        //     walk(false);
-        //     ProgressAlert();
-        // }
     }
 }

@@ -123,10 +123,10 @@ public class BuildingSystem : MonoBehaviour
     #region set buildings Mesh (call every frame where user moves)
     private void UpdateBuildingsMesh()
     {
-        sky.UpdateMesh(Walker.progress, 0);
-        buildingToSky.UpdateMesh(Walker.progress, 1);
-        doorToBuilding.UpdateMesh(Walker.progress, 2);
-        zeroToDoor.UpdateMesh(Walker.progress, 3);
+        sky.UpdateMesh(Walker.Progress, 0);
+        buildingToSky.UpdateMesh(Walker.Progress, 1);
+        doorToBuilding.UpdateMesh(Walker.Progress, 2);
+        zeroToDoor.UpdateMesh(Walker.Progress, 3);
     }
     #endregion
 }

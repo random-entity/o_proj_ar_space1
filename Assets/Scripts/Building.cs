@@ -103,13 +103,24 @@ public class Building : MonoBehaviour // !!!ALL ANGLES IN RADIANS!!!
         mesh.uv = uvs;
         mesh.triangles = triangles;
     }
-    public void UpdateMesh(float walkerProgress, int roleIndex) // 0 <= walkerProgress < 1
+    public static float GetAngWid(float walkerProgress, int roleIndex)
     {
         float angWid = Mathf.PI * 2f;
         if (roleIndex != 0) // not sky
         {
             angWid *= Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + walkerProgress);
         }
+        return angWid;
+    }
+    public void UpdateMesh(float walkerProgress, int roleIndex) // 0 <= walkerProgress < 1
+    {
+        // float angWid = Mathf.PI * 2f;
+        // if (roleIndex != 0) // not sky
+        // {
+        //     angWid *= Mathf.Pow(BuildingSystem.angWidStepRatio, -(float)roleIndex + walkerProgress);
+        // }
+        float angWid = GetAngWid(walkerProgress, roleIndex);
+
         material.SetFloat("_AngWid", angWid);
 
         if (roleIndex == 3) // zeroToDoor Building
